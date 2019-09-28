@@ -4,6 +4,7 @@ import io.javalin.Javalin
 
 class Server {
     private val api = Javalin.create()
+    private val zones = ZoneManager()
 
     fun run(args: Array<String>) {
         // Parse arguments
@@ -18,13 +19,22 @@ class Server {
 
         // Base routes
         api.get("/") { ctx -> ctx.result("You have ridden into the DangerZone.") }
+
+        // Test
+        println(zones.createZone())
+        println(zones.createZone())
+        println(zones.size())
+        zones.removeZone(0)
+        println(zones.size())
+        println(zones.createZone())
+        println(zones.size())
     }
 
-    private fun addNode() {
-        println("Adding a node")
+    private fun addZone() {
+        println("Adding a zone")
     }
 
-    private fun removeNode() {
-        println("Removing a node")
+    private fun removeZone() {
+        println("Removing a zone")
     }
 }
