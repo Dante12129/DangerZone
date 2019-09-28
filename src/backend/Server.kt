@@ -13,9 +13,18 @@ class Server {
         }
 
         // Start server
-        println("Starting server on port ${port}")
+        println("Starting server on port $port")
         api.start(port)
 
+        // Base routes
         api.get("/") { ctx -> ctx.result("You have ridden into the DangerZone.") }
+    }
+
+    private fun addNode() {
+        println("Adding a node")
+    }
+
+    private fun removeNode() {
+        println("Removing a node")
     }
 }
