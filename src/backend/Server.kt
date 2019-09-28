@@ -1,6 +1,9 @@
 package backend
 
 import io.javalin.Javalin
+import io.javalin.apibuilder.ApiBuilder.*
+import io.javalin.apibuilder.CrudHandler
+import io.javalin.http.Context
 
 class Server {
     private val api = Javalin.create()
@@ -20,21 +23,54 @@ class Server {
         // Base routes
         api.get("/") { ctx -> ctx.result("You have ridden into the DangerZone.") }
 
+        // Node routes
+        api.routes {
+            get("/zones/total") { ctx -> ctx.result("{zones: ${zones.size}}") }
+            crud("/zones/:zoneID", ZoneCrud())
+        }
+
         // Test
-        println(zones.createZone())
-        println(zones.createZone())
-        println(zones.size())
-        zones.removeZone(0)
-        println(zones.size())
-        println(zones.createZone())
-        println(zones.size())
+        zones.createZone()
     }
 
-    private fun addZone() {
-        println("Adding a zone")
-    }
+    inner class ZoneCrud: CrudHandler {
+        override fun create(ctx: Context) {
+            println("Processing request to create a zone")
+            val zone = this@Server.zones.createZone()
+            ctx.status(201)
+            ctx.result(zone.toJson())
+        }
 
-    private fun removeZone() {
-        println("Removing a zone")
+        override fun delete(ctx: Context, resourceId: String) {
+            println("Processing request to delete zone $resourceId")
+            zones.removeZone(resourceId.toInt())
+        }
+
+        override fun getAll(ctx: Context) {
+            println("Processing request to get all zones")
+            var result = "{'zones': [ "
+            for (i in 0 until zones.size) {
+                result += zones.getZone(i)!!.toJson() + " "
+            }
+            result += "]}"
+
+            ctx.result(result)
+        }
+
+        override fun getOne(ctx: Context, resourceId: String) {
+            println("Processing request to get zone $resourceId")
+            val zone = zones.getZone(resourceId.toInt())
+            if (zone != null) {
+                ctx.result(zone.toJson())
+            } else {
+                ctx.result("{error: 'No such zone exists'}")
+                ctx.status(404)
+            }
+        }
+
+        override fun update(ctx: Context, resourceId: String) {
+            println("Processing request to update zone $resourceId")
+        }
+
     }
 }
