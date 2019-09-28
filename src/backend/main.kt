@@ -1,6 +1,6 @@
 package backend
 
-fun main() {
+fun main(args: Array<String>) {
     val server = Server()
-    server.run()
+    server.run(args)
 }
