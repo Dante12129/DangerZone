@@ -5,6 +5,10 @@ let zoneID = 0;
 let entityID = 0;
 
 function toggleEditable(element) {
+    if(element.tagName === 'INPUT' && element.value.length < 1) {
+        return;
+    }
+
     let elementTag = 'p';
     if (element.tagName === 'P') {
         elementTag = 'input';
@@ -25,11 +29,20 @@ function toggleEditable(element) {
     } else {
         newElement.innerHTML = name;
         let data = {type: 'name', name: name};
-        console.log(JSON.stringify(data));
         let _ = fetch(`${serverIP}/entities/${zoneID}/${entityID}`, { method: 'PATCH', body: JSON.stringify(data) });
     }
 
     element.parentNode.replaceChild(newElement, element);
+}
+
+function updateIDs() {
+    let zoneElement = document.querySelector('#zone');
+    let entityElement = document.querySelector('#entity');
+
+    console.log(zoneID, entityID);
+
+    zoneElement.innerHTML = zoneID;
+    entityElement.innerHTML = entityID;
 }
 
 window.addEventListener('load', function () {
@@ -38,13 +51,16 @@ window.addEventListener('load', function () {
     // Get a free entity from the server
     fetch(`${serverIP}/entities/0`, { method: 'POST', mode: 'cors'}).then(response => {
         response.text().then(data => {
-            console.log(JSON.parse(data));
+            let jsonData = JSON.parse(data);
+            zoneID = jsonData['zoneID'];
+            entityID = jsonData['id'];
+            updateIDs()
         })
     });
 
     // Set toggleable name
     let nameElement = document.querySelector('#name');
-    name = nameElement.innerHTML;
+    name = nameElement.value;
     nameElement.addEventListener('dblclick', function (ev) {
         toggleEditable(nameElement)
     });
