@@ -39,21 +39,52 @@ function updateIDs() {
     let zoneElement = document.querySelector('#zone');
     let entityElement = document.querySelector('#entity');
 
-    console.log(zoneID, entityID);
-
     zoneElement.innerHTML = zoneID;
     entityElement.innerHTML = entityID;
 }
 
 function parseMessage(message) {
     let json = JSON.parse(message.data);
-    console.log(json);
+    // console.log(json);
 
-    let cat = json['cat']
+    let cat = json['cat'];
     switch (cat) {
-        case 'Alert': break;
+        case 'Alert': newAlertRow(json); break;
         case 'Move': break;
-        case 'NewZone': break;
+        case 'NewZone': newZoneRow(json); break;
+    }
+}
+
+function newAlertRow(json) {
+    let keys = ['type', 'severity', 'zoneID'];
+
+    let tableBody = document.querySelector('#alertBody');
+    let row = document.createElement('tr');
+    tableBody.appendChild(row);
+
+    for (let i = 0; i < 3; ++i) {
+        let cell = document.createElement('td');
+        cell.innerHTML = json[keys[i]];
+        row.appendChild(cell);
+    }
+}
+
+function newZoneRow(json) {
+    let tableBody = document.querySelector('#zoneBody');
+    let row = document.createElement('tr');
+    tableBody.appendChild(row);
+
+    let cells = Array(4);
+    for (let i = 0; i < 4; ++i) {
+        cells[i] = document.createElement('td');
+    }
+    cells[0].innerHTML = json['zoneID'];
+    cells[1].innerHTML = "Place";
+    cells[2].innerHTML = 0;
+    cells[2].id = `occupancy${json['zoneID']}`;
+    cells[3].innerHTML = "Clear"
+    for (let i = 0; i < 4; ++i) {
+        row.appendChild(cells[i]);
     }
 }
 
@@ -79,7 +110,7 @@ window.addEventListener('load', async function () {
     let socket = new WebSocket(`ws${serverIP.substring(4)}/sockets/${zoneID}/${entityID}`);
     socket.onopen = ev => {
         socket.onmessage = message => parseMessage(message);
-        socket.send(JSON.stringify({zoneID: zoneID, entityID: entityID, type: 'Fire', severity: 'All'}));
+        socket.send(JSON.stringify({zoneID: zoneID, entityID: entityID, type: 'Electrocution', severity: 'All'}));
     };
 
     // Things to do regularly
