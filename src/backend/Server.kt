@@ -37,7 +37,7 @@ class Server {
         // Main routes
         api.routes {
             // Zones routes
-            get("/zones/total") { ctx -> ctx.result("{zoneCount: ${zones.size}}") }
+            get("/zones/total") { ctx -> ctx.result("{\"zoneCount\": ${zones.size}}") }
             crud("/zones/:zoneID", ZoneCrud())
 
             // Entities routes

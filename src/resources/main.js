@@ -45,6 +45,12 @@ function updateIDs() {
     entityElement.innerHTML = entityID;
 }
 
+function parseMessage(message) {
+    console.log(message.data);
+    let json = JSON.parse(message.data);
+    console.log(json);
+}
+
 window.addEventListener('load', async function () {
     console.log('Loaded');
 
@@ -62,4 +68,13 @@ window.addEventListener('load', async function () {
     nameElement.addEventListener('dblclick', function (ev) {
         toggleEditable(nameElement)
     });
+
+    // Start websocket
+    console.log(`ws${serverIP.substring(4)}/sockets/${zoneID}/${entityID}`);
+    let socket = new WebSocket(`ws${serverIP.substring(4)}/sockets/${zoneID}/${entityID}`);
+
+    socket.onopen = ev => {
+        socket.onmessage = message => parseMessage(message);
+        socket.send(JSON.stringify({zoneID: zoneID, entityID: entityID, type: 'Fire', severity: 'All'}));
+    }
 });
