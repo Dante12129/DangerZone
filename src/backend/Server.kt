@@ -7,11 +7,14 @@ import io.javalin.http.BadRequestResponse
 import io.javalin.http.ConflictResponse
 import io.javalin.http.Context
 import io.javalin.http.NotFoundResponse
+import io.javalin.websocket.WsContext
 import org.json.*
+import java.util.concurrent.ConcurrentHashMap
 
 class Server {
     private val api = Javalin.create { config -> config.showJavalinBanner = false}
     private val zones = ZoneManager()
+    private val connections = ConcurrentHashMap<Entity, WsContext>()
 
     fun run(args: Array<String>) {
         // Parse arguments
@@ -37,10 +40,23 @@ class Server {
             // Entities routes
             crud("/entities/:zoneID/:entityID", EntityCrud())
 
-            // Notification routes
-            post("/notifications") { ctx ->
-                sendNotification(parseNotification(ctx.body()))
-                ctx.result("{success: 'Notification parsed and sent'}")
+            // Websocket communication
+            ws("/sockets/:zoneID/:entityID") { socket ->
+                socket.onConnect { ctx ->
+                    val entity = getEntity(ctx.pathParam("zoneID").toInt(), ctx.pathParam("entityID").toInt())
+                    connections[entity] = ctx
+
+                    println("Incoming websocket connection from ${entity.toJson()}")
+                }
+                socket.onClose { ctx ->
+                    val entity = getEntity(ctx.pathParam("zoneID").toInt(), ctx.pathParam("entityID").toInt())
+                    connections.remove(entity)
+
+                    println("Closed websocket connection from ${entity.toJson()}")
+                }
+                socket.onMessage { ctx ->
+                    sendNotification(parseNotification(ctx.message()))
+                }
             }
 
             // Test routes
@@ -49,12 +65,9 @@ class Server {
 
         // Test
         val zone1 = zones.createZone()
-        val entity1 = zone1.createEntity()
+        zone1.createEntity()
+        zone1.createEntity()
         zone1.nickname = "Reception"
-//        val entity2 = zone1.createEntity()
-//        val zone2 = zones.createZone()
-//        val entity3 = zone2.createEntity()
-
     }
 
     fun getZone(zoneID: Int): Zone {
@@ -122,17 +135,17 @@ class Server {
             Notification.Severity.All -> {
                 for (i in 0 until zones.size) {
                     for (j in 0 until getZone(i).size) {
-                        getEntity(i, j).notify(notification.sender, "Going to all")
+                        connections[getEntity(i, j)]?.send(notification.toJSON())
                     }
                 }
             }
             Notification.Severity.Self -> {
-                notification.sender.notify(notification.sender, "Just me")
+                connections[notification.sender]?.send(notification.toJSON())
             }
             Notification.Severity.Zone -> {
                 val zone = getZone(notification.sender.owningZone.id)
                 for (i in 0 until zone.size) {
-                    getEntity(zone.id, i).notify(notification.sender, "Just the zone")
+                    connections[getEntity(zone.id, i)]?.send(notification.toJSON())
                 }
             }
         }
