@@ -62,8 +62,32 @@ class Server {
                 }
             }
 
-            // Test routes
-            get("/test") { ctx -> ctx.result("${ctx.queryParam("p", "Nothing")}")}
+            // Other routes
+            patch("/move/:from/:to") {ctx ->
+                println("Processing request to move entity")
+                val from = ctx.pathParam("from").split(":")
+                val toZoneID = ctx.pathParam("to").toInt()
+
+                val fromZoneID = from[0].toInt()
+                val fromEntityID = from[1].toInt()
+
+                val fromZone = zones.getZone(fromZoneID)
+                val toZone = zones.getZone(toZoneID)
+                if (fromZone != null && toZone != null) {
+                    val entity = fromZone.getEntity(fromEntityID);
+                    if (entity != null) {
+                        fromZone.removeEntity(fromEntityID)
+                        val newEntity = toZone.createEntity()
+                        newEntity.nickname = entity.nickname
+                        sendNotification(MoveNotification(toZoneID, newEntity.id))
+                        ctx.result("{\"success\": \"Entity moved successfully\"}")
+                    } else {
+                        throw NotFoundResponse("Entity is incorrect")
+                    }
+                } else {
+                    throw ConflictResponse("Origin or Destination are incorrect")
+                }
+            }
         }
 
         // Test
@@ -93,19 +117,6 @@ class Server {
         }
     }
 
-    fun updateEntity(zoneID: Int, entityID: Int, data: String) {
-        val json = JSONObject(data)
-        val entity = getEntity(zoneID, entityID)
-
-        when (json.getString("type")) {
-            "name" -> {
-                val name = json.getString("name")
-                entity.nickname = name
-            }
-            else -> throw BadRequestResponse("Unsupported zone update type")
-        }
-    }
-
     fun getEntity(zoneID: Int, entityID: Int): Entity {
         val zone = try {
             getZone(zoneID)
@@ -121,6 +132,19 @@ class Server {
         }
     }
 
+    fun updateEntity(zoneID: Int, entityID: Int, data: String) {
+        val json = JSONObject(data)
+        val entity = getEntity(zoneID, entityID)
+
+        when (json.getString("type")) {
+            "name" -> {
+                val name = json.getString("name")
+                entity.nickname = name
+            }
+            else -> throw BadRequestResponse("Unsupported zone update type")
+        }
+    }
+
     private fun parseAlert(data: String): Notification {
         val json = JSONObject(data)
         val zoneID = json.getInt("zoneID")
@@ -128,7 +152,7 @@ class Server {
         val type = json.getString("type")
         val severity = json.getString("severity")
 
-        return AlertNotification(Notification.Category.Alert, AlertNotification.Type.valueOf(type), AlertNotification.Severity.valueOf(severity), getEntity(zoneID, entityID))
+        return AlertNotification(AlertNotification.Type.valueOf(type), AlertNotification.Severity.valueOf(severity), getEntity(zoneID, entityID))
     }
 
     private fun sendNotification(notification: Notification) {
@@ -165,7 +189,7 @@ class Server {
             println("Processing request to create a zone")
 
             val zone = this@Server.zones.createZone()
-            sendNotification(ZoneNotification(Notification.Category.NewZone, zone.id))
+            sendNotification(ZoneNotification(zone.id))
             ctx.status(201)
             ctx.result(zone.toJson())
         }

@@ -12,8 +12,10 @@ interface Notification {
     fun toJSON(): String
 }
 
-class AlertNotification(override val cat: Notification.Category, val type: Type, val severity: Severity, val sender: Entity) :
+class AlertNotification(val type: Type, val severity: Severity, val sender: Entity) :
     Notification {
+
+    override val cat = Notification.Category.Alert
 
     enum class Type {
         Fall,
@@ -34,8 +36,18 @@ class AlertNotification(override val cat: Notification.Category, val type: Type,
     }
 }
 
-class ZoneNotification(override val cat: Notification.Category, val id: Int) : Notification {
+class ZoneNotification(val id: Int) : Notification {
+    override val cat = Notification.Category.NewZone
+
     override fun toJSON(): String {
         return "{\"cat\": \"${cat.name}\", \"zoneID\": $id}"
+    }
+}
+
+class MoveNotification(val newZone: Int, val newEntity: Int) : Notification {
+    override val cat = Notification.Category.Move
+
+    override fun toJSON(): String {
+        return "{\"cat\": \"${cat.name}\", \"newZone\": $newZone, \"newEntity\": $newEntity}"
     }
 }

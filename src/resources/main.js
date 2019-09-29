@@ -49,9 +49,9 @@ function parseMessage(message) {
 
     let cat = json['cat'];
     switch (cat) {
-        case 'Alert': newAlertRow(json); break;
-        case 'Move': break;
-        case 'NewZone': newZoneRow(json); break;
+    case 'Alert': newAlertRow(json); break;
+    case 'Move': zoneID = json['newZone']; entityID = json['newEntity']; updateIDs(); break;
+    case 'NewZone': newZoneRow(json); break;
     }
 }
 
@@ -99,6 +99,13 @@ window.addEventListener('load', async function () {
     entityID = jsonData['id'];
     updateIDs();
 
+    // Create zone rows
+    let json = await (await fetch(`${serverIP}/zones/total`)).json();
+    let n = json['zoneCount'];
+    for (let i = 1; i < n; ++i) {
+        newZoneRow({zoneID: i});
+    }
+
     // Set toggleable name
     let nameElement = document.querySelector('#name');
     name = nameElement.value;
@@ -123,6 +130,6 @@ window.addEventListener('load', async function () {
             document.querySelector(`#occupancy${i}`).innerHTML = zone['entities'].length;
         }
 
-        clearInterval(interval);
+        // clearInterval(interval);
     },2000);
 });
