@@ -6,7 +6,7 @@ import io.javalin.apibuilder.CrudHandler
 import io.javalin.http.Context
 
 class Server {
-    private val api = Javalin.create()
+    private val api = Javalin.create { config -> config.showJavalinBanner = false}
     private val zones = ZoneManager()
 
     fun run(args: Array<String>) {
@@ -19,6 +19,7 @@ class Server {
         // Start server
         println("Starting server on port $port")
         api.start(port)
+        println("Server running...")
 
         // Base routes
         api.get("/") { ctx -> ctx.result("You have ridden into the DangerZone.") }
