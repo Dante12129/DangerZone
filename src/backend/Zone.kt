@@ -1,6 +1,6 @@
 package backend
 
-class Zone(val id: Int, var nickname: String?) {
+class Zone(val id: Int, var nickname: String? = null) {
     private val entities = mutableMapOf<Int, Entity>()
     private var highestEntity = 0;
 
@@ -30,6 +30,6 @@ class Zone(val id: Int, var nickname: String?) {
             entitiesAsJson += v.toJson() + " "
         }
         entitiesAsJson += "]"
-        return if (nickname == null) "{zoneID: $id, entities: $entitiesAsJson}" else "{zoneID: $id, entities: $entitiesAsJson}, nickname: $nickname"
+        return if (nickname == null) "{zoneID: $id, entities: $entitiesAsJson}" else "{zoneID: $id, nickname: $nickname, entities: $entitiesAsJson}"
     }
 }
