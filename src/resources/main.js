@@ -48,6 +48,13 @@ function updateIDs() {
 function parseMessage(message) {
     let json = JSON.parse(message.data);
     console.log(json);
+
+    let cat = json['cat']
+    switch (cat) {
+        case 'Alert': break;
+        case 'Move': break;
+        case 'NewZone': break;
+    }
 }
 
 window.addEventListener('load', async function () {
@@ -69,9 +76,7 @@ window.addEventListener('load', async function () {
     });
 
     // Start websocket
-    console.log(`ws${serverIP.substring(4)}/sockets/${zoneID}/${entityID}`);
     let socket = new WebSocket(`ws${serverIP.substring(4)}/sockets/${zoneID}/${entityID}`);
-
     socket.onopen = ev => {
         socket.onmessage = message => parseMessage(message);
         socket.send(JSON.stringify({zoneID: zoneID, entityID: entityID, type: 'Fire', severity: 'All'}));
