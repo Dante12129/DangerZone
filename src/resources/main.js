@@ -45,18 +45,16 @@ function updateIDs() {
     entityElement.innerHTML = entityID;
 }
 
-window.addEventListener('load', function () {
+window.addEventListener('load', async function () {
     console.log('Loaded');
 
     // Get a free entity from the server
-    fetch(`${serverIP}/entities/0`, { method: 'POST', mode: 'cors'}).then(response => {
-        response.text().then(data => {
-            let jsonData = JSON.parse(data);
-            zoneID = jsonData['zoneID'];
-            entityID = jsonData['id'];
-            updateIDs()
-        })
-    });
+    let response = await fetch(`${serverIP}/entities/0`, {method: 'POST', mode: 'cors'});
+    let data = await response.text();
+    let jsonData = JSON.parse(data);
+    zoneID = jsonData['zoneID'];
+    entityID = jsonData['id'];
+    updateIDs();
 
     // Set toggleable name
     let nameElement = document.querySelector('#name');
