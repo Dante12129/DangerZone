@@ -128,25 +128,33 @@ class Server {
         val type = json.getString("type")
         val severity = json.getString("severity")
 
-        return Notification(Notification.Category.Alert, Notification.Type.valueOf(type), Notification.Severity.valueOf(severity), getEntity(zoneID, entityID))
+        return AlertNotification(Notification.Category.Alert, AlertNotification.Type.valueOf(type), AlertNotification.Severity.valueOf(severity), getEntity(zoneID, entityID))
     }
 
     private fun sendNotification(notification: Notification) {
-        when (notification.severity) {
-            Notification.Severity.All -> {
-                for (i in 0 until zones.size) {
-                    for (j in 0 until getZone(i).size) {
-                        connections[getEntity(i, j)]?.send(notification.toJSON())
+        if (notification as? AlertNotification != null) {
+            when (notification.severity) {
+                AlertNotification.Severity.All -> {
+                    for (i in 0 until zones.size) {
+                        for (j in 0 until getZone(i).size) {
+                            connections[getEntity(i, j)]?.send(notification.toJSON())
+                        }
+                    }
+                }
+                AlertNotification.Severity.Self -> {
+                    connections[notification.sender]?.send(notification.toJSON())
+                }
+                AlertNotification.Severity.Zone -> {
+                    val zone = getZone(notification.sender.owningZone.id)
+                    for (i in 0 until zone.size) {
+                        connections[getEntity(zone.id, i)]?.send(notification.toJSON())
                     }
                 }
             }
-            Notification.Severity.Self -> {
-                connections[notification.sender]?.send(notification.toJSON())
-            }
-            Notification.Severity.Zone -> {
-                val zone = getZone(notification.sender.owningZone.id)
-                for (i in 0 until zone.size) {
-                    connections[getEntity(zone.id, i)]?.send(notification.toJSON())
+        } else {
+            for (i in 0 until zones.size) {
+                for (j in 0 until getZone(i).size) {
+                    connections[getEntity(i, j)]?.send(notification.toJSON())
                 }
             }
         }
