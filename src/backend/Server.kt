@@ -3,6 +3,7 @@ package backend
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.*
 import io.javalin.apibuilder.CrudHandler
+import io.javalin.http.BadRequestResponse
 import io.javalin.http.ConflictResponse
 import io.javalin.http.Context
 import io.javalin.http.NotFoundResponse
@@ -49,9 +50,10 @@ class Server {
         // Test
         val zone1 = zones.createZone()
         val entity1 = zone1.createEntity()
-        val entity2 = zone1.createEntity()
-        val zone2 = zones.createZone()
-        val entity3 = zone2.createEntity()
+        zone1.nickname = "Reception"
+//        val entity2 = zone1.createEntity()
+//        val zone2 = zones.createZone()
+//        val entity3 = zone2.createEntity()
 
     }
 
@@ -61,6 +63,32 @@ class Server {
             return zone
         } else {
             throw NotFoundResponse("No such zone exists")
+        }
+    }
+
+    fun updateZone(zoneID: Int, data: String) {
+        val json = JSONObject(data)
+        val zone = getZone(zoneID)
+
+        when (json.getString("type")) {
+            "name" -> {
+                val name = json.getString("name")
+                zone.nickname = name
+            }
+            else -> throw BadRequestResponse("Unsupported zone update type")
+        }
+    }
+
+    fun updateEntity(zoneID: Int, entityID: Int, data: String) {
+        val json = JSONObject(data)
+        val entity = getEntity(zoneID, entityID)
+
+        when (json.getString("type")) {
+            "name" -> {
+                val name = json.getString("name")
+                entity.nickname = name
+            }
+            else -> throw BadRequestResponse("Unsupported zone update type")
         }
     }
 
@@ -145,6 +173,9 @@ class Server {
 
         override fun update(ctx: Context, resourceId: String) {
             println("Processing request to update zone $resourceId")
+
+            updateZone(resourceId.toInt(), ctx.body())
+            ctx.result("{success: Zone updated")
         }
 
     }
@@ -201,6 +232,9 @@ class Server {
 
         override fun update(ctx: Context, resourceId: String) {
             println("Processing request to update entity $resourceId in zone ${ctx.pathParam("zoneID")}")
+
+            updateEntity(ctx.pathParam("zoneID").toInt(), resourceId.toInt(), ctx.body())
+            ctx.result("{success: Entity updated")
         }
 
     }
