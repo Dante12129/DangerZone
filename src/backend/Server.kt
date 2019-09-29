@@ -38,7 +38,7 @@ class Server {
 
             // Notification routes
             post("/notifications") { ctx ->
-                val notification = parseNotification(ctx.body())
+                sendNotification(parseNotification(ctx.body()))
                 ctx.result("{success: 'Notification parsed and sent'}")
             }
 
@@ -47,7 +47,12 @@ class Server {
         }
 
         // Test
-        zones.createZone()
+        val zone1 = zones.createZone()
+        val entity1 = zone1.createEntity()
+        val entity2 = zone1.createEntity()
+        val zone2 = zones.createZone()
+        val entity3 = zone2.createEntity()
+
     }
 
     fun getZone(zoneID: Int): Zone {
@@ -82,6 +87,27 @@ class Server {
         val severity = json.getString("severity")
 
         return Notification(Notification.Type.valueOf(type), Notification.Severity.valueOf(severity), getEntity(zoneID, entityID))
+    }
+
+    private fun sendNotification(notification: Notification) {
+        when (notification.severity) {
+            Notification.Severity.All -> {
+                for (i in 0 until zones.size) {
+                    for (j in 0 until getZone(i).size) {
+                        getEntity(i, j).notify(notification.sender, "Going to all")
+                    }
+                }
+            }
+            Notification.Severity.Self -> {
+                notification.sender.notify(notification.sender, "Just me")
+            }
+            Notification.Severity.Zone -> {
+                val zone = getZone(notification.sender.owningZone.id)
+                for (i in 0 until zone.size) {
+                    getEntity(zone.id, i).notify(notification.sender, "Just the zone")
+                }
+            }
+        }
     }
 
     inner class ZoneCrud: CrudHandler {
