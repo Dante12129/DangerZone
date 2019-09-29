@@ -69,19 +69,24 @@ function newAlertRow(json) {
     }
 }
 
+const zoneNames = ["Office", "Bow", "Stern", "Port", "Aft"];
+
 function newZoneRow(json) {
     let tableBody = document.querySelector('#zoneBody');
     let row = document.createElement('tr');
     tableBody.appendChild(row);
 
+    let zoneID = json['zoneID'];
+    let roomName = zoneID <= zoneNames.length ? zoneNames[zoneID - 1] : "Place";
+
     let cells = Array(4);
     for (let i = 0; i < 4; ++i) {
         cells[i] = document.createElement('td');
     }
-    cells[0].innerHTML = json['zoneID'];
-    cells[1].innerHTML = "Place";
+    cells[0].innerHTML = zoneID;
+    cells[1].innerHTML = roomName;
     cells[2].innerHTML = 0;
-    cells[2].id = `occupancy${json['zoneID']}`;
+    cells[2].id = `occupancy${zoneID}`;
     cells[3].innerHTML = "Clear"
     for (let i = 0; i < 4; ++i) {
         row.appendChild(cells[i]);

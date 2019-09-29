@@ -53,3 +53,7 @@ p.ids {
 p#name {
     margin: 2px;
 }
+
+td > p {
+    margin: 0;
+}
