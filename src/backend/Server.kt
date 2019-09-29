@@ -81,7 +81,7 @@ class Server {
         val type = json.getString("type")
         val severity = json.getString("severity")
 
-        return Notification(Notification.Type.valueOf(type), Notification.Severity.valueOf(severity), Entity(entityID, Zone(zoneID)))
+        return Notification(Notification.Type.valueOf(type), Notification.Severity.valueOf(severity), getEntity(zoneID, entityID))
     }
 
     inner class ZoneCrud: CrudHandler {
