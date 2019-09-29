@@ -2,7 +2,6 @@ package backend
 
 interface Notification {
     val cat: Category
-    val sender: Entity
 
     enum class Category {
         Alert,
@@ -13,7 +12,7 @@ interface Notification {
     fun toJSON(): String
 }
 
-class AlertNotification(override val cat: Notification.Category, val type: Type, val severity: Severity, override val sender: Entity) :
+class AlertNotification(override val cat: Notification.Category, val type: Type, val severity: Severity, val sender: Entity) :
     Notification {
 
     enum class Type {
@@ -35,4 +34,8 @@ class AlertNotification(override val cat: Notification.Category, val type: Type,
     }
 }
 
-class ZoneNotification
+class ZoneNotification(override val cat: Notification.Category, val id: Int) : Notification {
+    override fun toJSON(): String {
+        return "{\"cat\": \"${cat.name}\", \"zoneID\": $id}"
+    }
+}

@@ -165,6 +165,7 @@ class Server {
             println("Processing request to create a zone")
 
             val zone = this@Server.zones.createZone()
+            sendNotification(ZoneNotification(Notification.Category.NewZone, zone.id))
             ctx.status(201)
             ctx.result(zone.toJson())
         }
