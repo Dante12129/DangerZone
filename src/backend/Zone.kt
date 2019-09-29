@@ -30,6 +30,6 @@ class Zone(val id: Int, var nickname: String? = null) {
             entitiesAsJson += v.toJson() + " "
         }
         entitiesAsJson += "]"
-        return if (nickname == null) "{zoneID: $id, entities: $entitiesAsJson}" else "{zoneID: $id, nickname: $nickname, entities: $entitiesAsJson}"
+        return if (nickname == null) "{\"zoneID\": $id, \"entities\": $entitiesAsJson}" else "{\"zoneID\": $id, \"nickname\": $nickname, \"entities\": $entitiesAsJson}"
     }
 }
