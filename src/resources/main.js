@@ -78,6 +78,7 @@ function newZoneRow(json) {
 
     let zoneID = json['zoneID'];
     let roomName = zoneID <= zoneNames.length ? zoneNames[zoneID - 1] : "Place";
+    fetch(`${serverIP}/zones/${zoneID}`, { method: 'PATCH', body: JSON.stringify({type: 'name', name: roomName})});
 
     let cells = Array(4);
     for (let i = 0; i < 4; ++i) {
