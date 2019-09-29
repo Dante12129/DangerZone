@@ -3,7 +3,10 @@ package backend
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.*
 import io.javalin.apibuilder.CrudHandler
+import io.javalin.http.ConflictResponse
 import io.javalin.http.Context
+import io.javalin.http.NotFoundResponse
+import org.json.*
 
 class Server {
     private val api = Javalin.create { config -> config.showJavalinBanner = false}
@@ -27,11 +30,17 @@ class Server {
         // Main routes
         api.routes {
             // Zones routes
-            get("/zones/total") { ctx -> ctx.result("{zones: ${zones.size}}") }
+            get("/zones/total") { ctx -> ctx.result("{zoneCount: ${zones.size}}") }
             crud("/zones/:zoneID", ZoneCrud())
 
             // Entities routes
             crud("/entities/:zoneID/:entityID", EntityCrud())
+
+            // Notification routes
+            post("/notifications") { ctx ->
+                val notification = parseNotification(ctx.body())
+                ctx.result("{success: 'Notification parsed and sent'}")
+            }
 
             // Test routes
             get("/test") { ctx -> ctx.result("${ctx.queryParam("p", "Nothing")}")}
@@ -39,6 +48,40 @@ class Server {
 
         // Test
         zones.createZone()
+    }
+
+    fun getZone(zoneID: Int): Zone {
+        val zone = zones.getZone(zoneID)
+        if (zone != null) {
+            return zone
+        } else {
+            throw NotFoundResponse("No such zone exists")
+        }
+    }
+
+    fun getEntity(zoneID: Int, entityID: Int): Entity {
+        val zone = try {
+            getZone(zoneID)
+        } catch (e: NotFoundResponse) {
+            throw ConflictResponse("No such zone exists")
+        }
+
+        val entity = zone.getEntity(entityID)
+        if (entity != null) {
+            return entity
+        } else {
+            throw NotFoundResponse("No such entity exists")
+        }
+    }
+
+    private fun parseNotification(data: String): Notification {
+        val json = JSONObject(data)
+        val zoneID = json.getInt("zoneID")
+        val entityID = json.getInt("entityID")
+        val type = json.getString("type")
+        val severity = json.getString("severity")
+
+        return Notification(Notification.Type.valueOf(type), Notification.Severity.valueOf(severity), Entity(entityID, Zone(zoneID)))
     }
 
     inner class ZoneCrud: CrudHandler {
@@ -59,9 +102,9 @@ class Server {
         override fun getAll(ctx: Context) {
             println("Processing request to get all zones")
 
-            var result = "{'zones': [ "
+            var result = "{zones: [ "
             for (i in 0 until zones.size) {
-                result += zones.getZone(i)!!.toJson() + " "
+                result += getZone(i).toJson() + " "
             }
             result += "]}"
 
@@ -71,13 +114,7 @@ class Server {
         override fun getOne(ctx: Context, resourceId: String) {
             println("Processing request to get zone $resourceId")
 
-            val zone = zones.getZone(resourceId.toInt())
-            if (zone != null) {
-                ctx.result(zone.toJson())
-            } else {
-                ctx.result("{error: 'No such zone exists'}")
-                ctx.status(404)
-            }
+            ctx.result(getZone(resourceId.toInt()).toJson())
         }
 
         override fun update(ctx: Context, resourceId: String) {
@@ -120,7 +157,7 @@ class Server {
             if (zone != null) {
                 var result = "{entities: [ "
                 for (i in 0 until zone.size) {
-                    result += zone.getEntity(i)!!.toJson() + " "
+                    result += getEntity(ctx.pathParam("zoneID").toInt(), i).toJson() + " "
                 }
                 result += "]}"
                 ctx.result(result)
@@ -133,19 +170,7 @@ class Server {
         override fun getOne(ctx: Context, resourceId: String) {
             println("Processing request to get entity $resourceId in zone ${ctx.pathParam("zoneID")}")
 
-            val zone = zones.getZone(ctx.pathParam("zoneID").toInt())
-            if (zone != null) {
-                val entity = zone.getEntity(resourceId.toInt())
-                if (entity != null) {
-                    ctx.result(entity.toJson())
-                } else {
-                    ctx.result("{error: 'No such entity exists'}")
-                    ctx.status(404)
-                }
-            } else {
-                ctx.result("{error: 'No such zone exists'}")
-                ctx.status(409)
-            }
+            ctx.result(getEntity(ctx.pathParam("zoneID").toInt(), resourceId.toInt()).toJson())
         }
 
         override fun update(ctx: Context, resourceId: String) {
