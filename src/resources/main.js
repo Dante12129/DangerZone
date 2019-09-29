@@ -46,7 +46,6 @@ function updateIDs() {
 }
 
 function parseMessage(message) {
-    console.log(message.data);
     let json = JSON.parse(message.data);
     console.log(json);
 }
@@ -76,5 +75,18 @@ window.addEventListener('load', async function () {
     socket.onopen = ev => {
         socket.onmessage = message => parseMessage(message);
         socket.send(JSON.stringify({zoneID: zoneID, entityID: entityID, type: 'Fire', severity: 'All'}));
-    }
+    };
+
+    // Things to do regularly
+    let interval = setInterval(async () => {
+        // Update occupancies
+        let json = await (await fetch(`${serverIP}/zones/total`)).json();
+        let n = json['zoneCount'];
+        for (let i = 0; i < n; ++i) {
+            let zone = await (await fetch(`${serverIP}/zones/${i}`)).json();
+            document.querySelector(`#occupancy${i}`).innerHTML = zone['entities'].length;
+        }
+
+        clearInterval(interval);
+    },2000);
 });

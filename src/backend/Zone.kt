@@ -28,11 +28,8 @@ class Zone(val id: Int, var nickname: String? = null) {
         entities.forEach { _, v ->
             entitiesAsJson += v.toJson() + ", "
         }
-        println(entitiesAsJson)
         if (entities.isNotEmpty()) entitiesAsJson = entitiesAsJson.dropLast(2)
-        println(entitiesAsJson)
         entitiesAsJson += " ]"
-        println(entitiesAsJson)
         return if (nickname == null) "{\"zoneID\": $id, \"entities\": $entitiesAsJson}" else "{\"zoneID\": $id, \"nickname\": \"$nickname\", \"entities\": $entitiesAsJson}"
     }
 }
