@@ -4,17 +4,58 @@
 <head>
     <meta charset="UTF-8">
     <title>DangerZone</title>
+    <link rel="stylesheet" href="main.css">
 </head>
 
 <body>
-<div>
-    <h1>Zones</h1>
-</div>
-<div>
-    <h1>Alerts</h1>
-</div>
-<div>
-    <h1>Info</h1>
+<div class="main">
+    <div class="zones">
+        <h3>Zones</h3>
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Occupancy</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>0</td>
+                <td>Default</td>
+                <td>0</td>
+                <td>Clear</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="alerts">
+        <h3>Alerts</h3>
+        <table class="alerts">
+            <thead>
+            <tr>
+                <th>Category</th>
+                <th>Severity</th>
+                <th>Zone</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Fall</td>
+                <td>All</td>
+                <td>0</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="info">
+        <p id="name">Dan</p>
+<!--        <p class="ids"><span id="zone">Zone</span><span id="entity">ID</span></p>-->
+        <p class="ids">Zone: <span id="zone">0</span> Entity<span id="entity">0</span></p>
+    </div>
 </div>
 </body>
 

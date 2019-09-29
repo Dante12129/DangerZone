@@ -1,0 +1,55 @@
+html, body {
+    background: black;
+    color: #bdbdbd;
+    text-align: center;
+
+    margin: 0;
+    height: 99%;
+}
+
+div {
+    border: 1px solid white;
+}
+
+table.alerts {
+    width: 75%;
+}
+
+table {
+    margin: 0 auto;
+    width: 50%;
+}
+
+div.main {
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: auto auto auto fit-content(80px);
+    grid-template-areas:
+    "tl tl tl tr tr"
+    "tl tl tl tr tr"
+    "tl tl tl tr tr"
+    "tl tl tl bt bt";
+}
+
+div.zones {
+    grid-area: tl;
+}
+
+div.alerts {
+    grid-area: tr;
+}
+
+div.info {
+    grid-area: bt;
+}
+
+p.ids {
+    margin: 4px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+p#name {
+    margin: 2px;
+}
