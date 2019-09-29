@@ -58,7 +58,7 @@ class Server {
                     println("Closed websocket connection from ${entity.toJson()}")
                 }
                 socket.onMessage { ctx ->
-                    sendNotification(parseNotification(ctx.message()))
+                    sendNotification(parseAlert(ctx.message()))
                 }
             }
 
@@ -121,14 +121,14 @@ class Server {
         }
     }
 
-    private fun parseNotification(data: String): Notification {
+    private fun parseAlert(data: String): Notification {
         val json = JSONObject(data)
         val zoneID = json.getInt("zoneID")
         val entityID = json.getInt("entityID")
         val type = json.getString("type")
         val severity = json.getString("severity")
 
-        return Notification(Notification.Type.valueOf(type), Notification.Severity.valueOf(severity), getEntity(zoneID, entityID))
+        return Notification(Notification.Category.Alert, Notification.Type.valueOf(type), Notification.Severity.valueOf(severity), getEntity(zoneID, entityID))
     }
 
     private fun sendNotification(notification: Notification) {

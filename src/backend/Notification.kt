@@ -1,6 +1,11 @@
 package backend
 
-class Notification(val type: Type, val severity: Severity, val sender: Entity) {
+class Notification(val cat: Category, val type: Type, val severity: Severity, val sender: Entity) {
+    enum class Category {
+        Alert,
+        Move,
+        NewZone
+    }
     enum class Type {
         Fall,
         HazardousExposure,
@@ -16,6 +21,6 @@ class Notification(val type: Type, val severity: Severity, val sender: Entity) {
     }
 
     fun toJSON(): String {
-        return "{\"zoneID\": ${sender.owningZone.id}, \"entityID\": ${sender.id}, \"type\": \"${type.name}\", \"severity\": \"${severity.name}\"}"
+        return "{\"cat\": \"${cat.name}\", \"zoneID\": ${sender.owningZone.id}, \"entityID\": ${sender.id}, \"type\": \"${type.name}\", \"severity\": \"${severity.name}\"}"
     }
 }
