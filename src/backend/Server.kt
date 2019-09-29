@@ -12,7 +12,10 @@ import org.json.*
 import java.util.concurrent.ConcurrentHashMap
 
 class Server {
-    private val api = Javalin.create { config -> config.showJavalinBanner = false; config.enableCorsForAllOrigins() }
+    private val api = Javalin.create { config ->
+        config.showJavalinBanner = false
+        config.enableCorsForAllOrigins()
+    }
     private val zones = ZoneManager()
     private val connections = ConcurrentHashMap<Entity, WsContext>()
 
