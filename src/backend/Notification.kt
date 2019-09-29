@@ -16,6 +16,6 @@ class Notification(val type: Type, val severity: Severity, val sender: Entity) {
     }
 
     fun toJSON(): String {
-        return "{zoneID: ${sender.owningZone.id}, entityID: ${sender.id}, type: ${type.name}, severity: ${severity.name}}"
+        return "{\"zoneID\": ${sender.owningZone.id}, \"entityID\": ${sender.id}, \"type\": \"${type.name}\", \"severity\": \"${severity.name}\"}"
     }
 }
