@@ -65,9 +65,7 @@ class Server {
 
         // Test
         val zone1 = zones.createZone()
-        zone1.createEntity()
-        zone1.createEntity()
-        zone1.nickname = "Reception"
+        zone1.nickname = "Default"
     }
 
     fun getZone(zoneID: Int): Zone {
