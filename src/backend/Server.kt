@@ -170,7 +170,7 @@ class Server {
         override fun getAll(ctx: Context) {
             println("Processing request to get all zones")
 
-            var result = "{zones: [ "
+            var result = "{\"zones\": [ "
             for (i in 0 until zones.size) {
                 result += getZone(i).toJson() + " "
             }

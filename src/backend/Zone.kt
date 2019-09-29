@@ -24,13 +24,15 @@ class Zone(val id: Int, var nickname: String? = null) {
     }
 
     fun toJson(): String {
-        var entitiesAsJson = ""
-        entitiesAsJson = "[ "
+        var entitiesAsJson = "[ "
         entities.forEach { _, v ->
             entitiesAsJson += v.toJson() + ", "
         }
-        entitiesAsJson = entitiesAsJson.dropLast(2)
+        println(entitiesAsJson)
+        if (entities.isNotEmpty()) entitiesAsJson = entitiesAsJson.dropLast(2)
+        println(entitiesAsJson)
         entitiesAsJson += " ]"
+        println(entitiesAsJson)
         return if (nickname == null) "{\"zoneID\": $id, \"entities\": $entitiesAsJson}" else "{\"zoneID\": $id, \"nickname\": \"$nickname\", \"entities\": $entitiesAsJson}"
     }
 }
